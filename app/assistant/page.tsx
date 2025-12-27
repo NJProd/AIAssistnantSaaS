@@ -206,10 +206,38 @@ export default function AssistantPage() {
       .replace(/\*/g, '')
       .replace(/•/g, '')
       .replace(/\n+/g, '. ')
+      .replace(/\$/g, ' dollars ')
     
     const utterance = new SpeechSynthesisUtterance(cleanText)
-    utterance.rate = 1.0
-    utterance.pitch = 1.0
+    
+    // Find the best available voice - prefer natural/premium voices
+    const voices = speechSynthesis.getVoices()
+    const preferredVoices = [
+      'Google US English',        // Chrome - very natural
+      'Google UK English Female', // Chrome - natural
+      'Samantha',                 // macOS - natural female
+      'Alex',                     // macOS - natural male
+      'Microsoft Zira',           // Windows - decent female
+      'Microsoft David',          // Windows - decent male
+      'Microsoft Mark',           // Windows 11 - natural
+      'Microsoft Jenny',          // Windows 11 - very natural
+    ]
+    
+    let selectedVoice = null
+    for (const name of preferredVoices) {
+      selectedVoice = voices.find(v => v.name.includes(name))
+      if (selectedVoice) break
+    }
+    // Fallback: find any English voice
+    if (!selectedVoice) {
+      selectedVoice = voices.find(v => v.lang.startsWith('en'))
+    }
+    if (selectedVoice) {
+      utterance.voice = selectedVoice
+    }
+    
+    utterance.rate = 0.95  // Slightly slower for clarity
+    utterance.pitch = 1.05 // Slightly higher for friendliness
     utterance.onstart = () => setSpeaking(true)
     utterance.onend = () => setSpeaking(false)
     utterance.onerror = () => setSpeaking(false)
