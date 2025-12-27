@@ -19,15 +19,17 @@ const configSchema = z.object({
   API_PORT: z.coerce.number().default(3001),
   API_HOST: z.string().default('0.0.0.0'),
 
-  // LLM Provider
-  LLM_PROVIDER: z.enum(['anthropic', 'openai']).default('anthropic'),
+  // LLM Provider (gemini is FREE!)
+  LLM_PROVIDER: z.enum(['gemini', 'anthropic', 'openai']).default('gemini'),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-1.5-flash'),
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-4-20250514'),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default('gpt-4-turbo-preview'),
 
-  // Transcription
-  TRANSCRIPTION_PROVIDER: z.enum(['whisper', 'deepgram']).default('whisper'),
+  // Transcription (gemini is FREE!)
+  TRANSCRIPTION_PROVIDER: z.enum(['gemini', 'whisper', 'deepgram']).default('gemini'),
   DEEPGRAM_API_KEY: z.string().optional(),
 
   // Rate Limiting
