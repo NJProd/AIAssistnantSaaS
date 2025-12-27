@@ -39,6 +39,10 @@ export default function AssistantPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const listeningRef = useRef(false)
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSpeechRef = useRef<number>(0)
+  const inputRef = useRef<string>('')
+  const sendMessageRef = useRef<((msg?: string) => void) | null>(null)
   const router = useRouter()
 
   // Fetch user data on mount
@@ -65,11 +69,16 @@ export default function AssistantPage() {
     listeningRef.current = listening
   }, [listening])
 
+  // Keep inputRef in sync with input state for silence detection
+  useEffect(() => {
+    inputRef.current = input
+  }, [input])
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, interimTranscript])
 
-  // Setup speech recognition with auto-restart
+  // Setup speech recognition with auto-send after silence
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return
 
@@ -96,10 +105,12 @@ export default function AssistantPage() {
       }
 
       setInterimTranscript(interim)
+      lastSpeechRef.current = Date.now()
       
       if (final) {
         setInput((prev) => (prev + ' ' + final).trim())
         setInterimTranscript('')
+        lastSpeechRef.current = Date.now()
       }
     }
 
@@ -122,7 +133,10 @@ export default function AssistantPage() {
     }
 
     recognitionRef.current = recognition
-    return () => { recognition.stop() }
+    return () => { 
+      recognition.stop()
+      if (silenceTimerRef.current) clearInterval(silenceTimerRef.current)
+    }
   }, [])
 
   const startListening = useCallback(() => {
@@ -133,7 +147,23 @@ export default function AssistantPage() {
     }
     listeningRef.current = true
     setListening(true)
+    lastSpeechRef.current = 0 // Reset - no speech detected yet
     try { recognitionRef.current.start() } catch {}
+    
+    // Start silence detection timer - auto-send after 2 seconds of silence
+    if (silenceTimerRef.current) clearInterval(silenceTimerRef.current)
+    silenceTimerRef.current = setInterval(() => {
+      const now = Date.now()
+      const timeSinceLastSpeech = now - lastSpeechRef.current
+      // If we have speech input and 2 seconds of silence, auto-send
+      if (lastSpeechRef.current > 0 && timeSinceLastSpeech > 2000 && inputRef.current.trim()) {
+        // Stop listening and send
+        if (silenceTimerRef.current) clearInterval(silenceTimerRef.current)
+        if (sendMessageRef.current) {
+          sendMessageRef.current()
+        }
+      }
+    }, 500)
   }, [])
 
   const stopListening = useCallback(() => {
@@ -141,6 +171,10 @@ export default function AssistantPage() {
     setListening(false)
     if (recognitionRef.current) try { recognitionRef.current.stop() } catch {}
     setInterimTranscript('')
+    if (silenceTimerRef.current) {
+      clearInterval(silenceTimerRef.current)
+      silenceTimerRef.current = null
+    }
   }, [])
 
   const toggleListening = () => {
@@ -210,6 +244,11 @@ export default function AssistantPage() {
       setLoading(false)
     }
   }
+
+  // Keep sendMessage ref updated for silence detection
+  useEffect(() => {
+    sendMessageRef.current = sendMessage
+  })
 
   const handleLogout = async () => {
     stopListening()
@@ -416,7 +455,7 @@ export default function AssistantPage() {
           </div>
           
           <p className="text-center text-xs text-gray-400 mt-3">
-            {listening ? '🔴 Tap mic to stop • Press Enter to send' : 'Tap 🎤 to speak or type your question'}
+            {listening ? '🎤 Listening... Will send after you stop speaking' : 'Tap 🎤 to speak or type your question'}
           </p>
         </div>
       </div>
