@@ -161,13 +161,13 @@ export default function AssistantPage() {
     lastSpeechRef.current = 0 // Reset - no speech detected yet
     try { recognitionRef.current.start() } catch {}
     
-    // Start silence detection timer - auto-send after 2 seconds of silence
+    // Start silence detection timer - auto-send after 1.2 seconds of silence
     if (silenceTimerRef.current) clearInterval(silenceTimerRef.current)
     silenceTimerRef.current = setInterval(() => {
       const now = Date.now()
       const timeSinceLastSpeech = now - lastSpeechRef.current
-      // If we have speech input and 2 seconds of silence, auto-send
-      if (lastSpeechRef.current > 0 && timeSinceLastSpeech > 2000 && inputRef.current.trim()) {
+      // If we have speech input and 1.2 seconds of silence, auto-send
+      if (lastSpeechRef.current > 0 && timeSinceLastSpeech > 1200 && inputRef.current.trim()) {
         // Stop listening and send
         if (silenceTimerRef.current) clearInterval(silenceTimerRef.current)
         if (sendMessageRef.current) {
