@@ -17,7 +17,8 @@ export async function askAssistant(
   question: string,
   products: Product[]
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  // Using gemma-3-27b-it - Google's open model with separate quota
+  const model = genAI.getGenerativeModel({ model: 'gemma-3-27b-it' })
 
   const productList = products
     .map(
@@ -43,8 +44,9 @@ Instructions:
   try {
     const result = await model.generateContent(prompt)
     return result.response.text()
-  } catch (error) {
-    console.error('Gemini API error:', error)
-    return "I'm sorry, I couldn't process your request. Please try again."
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('Gemini API error:', err.message, err)
+    return `I'm sorry, I couldn't process your request. Error: ${err.message}`
   }
 }

@@ -13,3 +13,4 @@ out
 # Misc
 *.log
 .DS_Store
+.vercel
