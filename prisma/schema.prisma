@@ -1,0 +1,54 @@
+// Prisma Schema for KatzAI - PostgreSQL
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  products  Product[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("EMPLOYEE") // EMPLOYEE, MANAGER, ADMIN
+  storeId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  store        Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  sku         String
+  name        String
+  description String
+  category    String
+  price       Decimal
+  stock       Int      @default(0)
+  aisle       String
+  bin         String?
+  tags        String   @default("[]")       // JSON array as string
+  attributes  String   @default("{}")       // JSON object as string
+  storeId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([sku, storeId])
+}

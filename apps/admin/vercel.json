@@ -1,6 +1,0 @@
-{
-  "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm --filter @katzai/shared build && pnpm --filter @katzai/admin build",
-  "outputDirectory": ".next"
-}

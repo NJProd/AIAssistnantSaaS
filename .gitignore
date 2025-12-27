@@ -1,9 +1,15 @@
-.env
+# Dependencies
 node_modules
-dist
+
+# Next.js
 .next
-.expo
+out
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Misc
 *.log
 .DS_Store
-coverage
-.turbo

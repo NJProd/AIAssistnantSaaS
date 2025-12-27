@@ -3,20 +3,40 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "lint": "pnpm -r lint",
-    "clean": "pnpm -r clean",
-    "db:push": "cd apps/api && pnpm prisma db push",
-    "db:seed": "cd apps/api && pnpm prisma db seed",
-    "postinstall": "cd apps/api && prisma generate"
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@prisma/client": "^5.8.1",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.0",
+    "jose": "^5.2.0",
+    "lucide-react": "^0.303.0",
+    "next": "^16.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "tsx": "^4.21.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.47",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.33",
+    "prisma": "^5.8.1",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=18.0.0"
   }
 }
